@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Logged in</title>
+</head>
+<body>
+<h1><%= name%></h1>
+<form action="/booking?name=<%=username%>" method="post" id="form">
+    <label><b>Source</b></label>
+    <input type="text" placeholder="Source" name="source" id="source" required>
+    <label><b>Destination</b></label>
+    <input type="text" placeholder="Destination" name="dest" id="dest" required>
+    <label>Start date </label>
+    <input type="date" id="startDate" name = "startDate" required >
+    <label><b>Return date</b> </label>
+    <input type="date" id="ReturnDate" name = "returnDate" >
+
+    <label><b>Travel Mode</b></label>
+    <select id="Travel_mode" name = "travelMode">
+        <option value="1">Flight</option>
+        <option value="2">Train</option>
+        <option value="3">Bus</option>
+    </select>
+    <button type="submit" id="submit" value="Book">Check availability</button>
+</form>
+
+<script>
+
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1; //January is 0!
+    var yyyy = today.getFullYear();
+//
+    var dd2=dd+1;
+  var mm2=mm+1;
+
+    if (dd < 10) {
+        dd = '0' + dd
+    }
+
+    if (mm < 10) {
+        mm = '0' + mm
+    }
+
+//    if (dd2 < 10) {
+//        dd2 = '0' + dd2
+//    }
+//
+//    if (mm2 < 10) {
+//        mm2 = '0' + mm2
+//    }
+
+    today = yyyy + '-' + mm + '-' + dd;
+
+    document.getElementById('startDate').setAttribute("min", today);
+   today=yyyy+ '-'+mm2+ '-'+dd2;
+    document.getElementById('ReturnDate').setAttribute("min",today);
+
+</script>
+
+</body>
+</html>
