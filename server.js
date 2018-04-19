@@ -87,54 +87,72 @@ app.post('/booking',function (req,res) {
 // bus.createTable();
 // train.createTable();
 
+
     var data = req.body;
     var Bid;
     console.log("form data : ", data);
     console.log("Check for source");
     var ss;
     var dd;
+    console.log("out");
 
-    placedb.placename(req.body.source, function (data) {
-        console.log(data);
-        if (data.length == 0) {
-            ss = 0;
-        }
-        else {
-            ss = (data[0].Pid);
-        }
-        console.log(ss);
-        if (ss == 0) {
-
-            res.send({
-
-                "failed": "Enter a correct source name"
-            })
-        }
-    });
-    placedb.placename(req.body.dest, function (data) {
-        console.log(data);
-        if (data.length == 0) {
-            dd = 0;
-        }
-        else {
-            dd = (data[0].Pid);
-        }
-        console.log(dd);
-        if (dd == 0) {
-
-            res.send({
-
-                "failed": "Enter a correct source name"
-            })
-        }
-    });
-
-
-    if (dd != 0 && ss != 0) {
-        addBooking(req,res);
+    if(req.body.startDate>req.body.returnDate)
+    {
+        console.log("In");
+        res.send({
+            "code":400,
+            "failed":"Check return date"
+        })
     }
+    else {
+
+
+        placedb.placename(req.body.source, function (data) {
+            console.log("inside check");
+            console.log(data);
+            if (data.length == 0) {
+                ss = 0;
+            }
+            else {
+                ss = (data[0].Pid);
+                placedb.placename(req.body.dest, function (data) {
+                    console.log(data);
+                    if (data.length == 0) {
+                        dd = 0;
+                    }
+                    else {
+                        dd = (data[0].Pid);
+                        if (dd != 0 && ss != 0) {
+                            addBooking(req, res);
+                        }
+                    }
+                    console.log(dd);
+                    if (dd == 0) {
+
+                        res.send({
+
+                            "failed": "Enter a correct destination name"
+                        })
+                    }
+                });
+
+            }
+            console.log(ss);
+            if (ss == 0) {
+
+                res.send({
+
+                    "failed": "Enter a correct source name"
+                })
+            }
+        });
+    }
+
+
+
 });
 function addBooking(req,res) {
+
     bdb.add(req.body.source,req.body.dest,req.body.startDate,req.body.returnDate ,req.query.name ,Math.floor(Math.random()*222222),Math.floor(Math.random()*2),function (bid) {
         console.log("Added a booking");
         Bid = bid;
@@ -243,36 +261,161 @@ app.post('/userdetails',function (req,res) {
 console.log(req.body);
 console.log(req.body.fname);
 
-udb.UsernameCheck(req.body.uname,function (data) {
-        // console.log("Data to be checked is")
-        // console.log(data);
-        if(data.length==0)
-        {
-            udb.adduser(req.body.fname, req.body.lname,req.body.uname,req.body.password,req.body.mail,req.body.dob,req.body.address,req.body.Gender,req.body.proof,req.body.nproof,function (data) {
-                res.render('pages/profile',{
-                    name:req.body.fname,
-                    last_name : req.body.lname,
-                    username:req.body.uname
+if(req.body.proof==1)
+{
+    if(req.body.nproof.length==12)
+    {
+        console.log("Yes it is 12");
+
+        udb.UsernameCheck(req.body.uname,function (data) {
+            // console.log("Data to be checked is")
+            // console.log(data);
+            if(data.length==0)
+            {
+                udb.adduser(req.body.fname, req.body.lname,req.body.uname,req.body.password,req.body.mail,req.body.dob,req.body.address,req.body.Gender,req.body.proof,req.body.nproof,function (data) {
+                    res.render('pages/profile',{
+                        name:req.body.fname,
+                        last_name : req.body.lname,
+                        username:req.body.uname
+                    })
+                    console.log("Done")
                 })
-                console.log("Done")
-            })
-            res.send({
+                res.send({
 
-                "success":"Successful sign up"
-            })
+                    "success":"Successful sign up"
+                })
 
+            }
+            else
+            {
+                res.send({
+                    "code":400,
+                    "failed":"This username is already taken"
+                })
+            }
+            // When doesnt match data.length==0
+            });
+    }
+    else
+    {
+        res.send({
+            "code":400,
+            "failed":"Enter correct Id Proof Number"
+        })
+    }
+
+
+}
+else if(req.body.proof==2)
+ {
+//     console.log(req.body.nproof.substring(0,4));
+//     console.log("second");
+//     console.log(req.body.nproof.substring(0,4).match((/[0-9]/i)));
+    if(req.body.nproof.substring(0,5).match((/[0-9]/i))==null &&req.body.nproof.length==10)
+    {
+        if(req.body.nproof.substring(5,9).match((/[a-z]/i))==null && req.body.nproof.substring(9,10).match((/[0-9]/i))==null)
+        {
+            udb.UsernameCheck(req.body.uname,function (data) {
+                // console.log("Data to be checked is")
+                // console.log(data);
+                if(data.length==0)
+                {
+                    udb.adduser(req.body.fname, req.body.lname,req.body.uname,req.body.password,req.body.mail,req.body.dob,req.body.address,req.body.Gender,req.body.proof,req.body.nproof,function (data) {
+                        res.render('pages/profile',{
+                            name:req.body.fname,
+                            last_name : req.body.lname,
+                            username:req.body.uname
+                        })
+                        console.log("Done")
+                    })
+                    res.send({
+
+                        "success":"Successful sign up"
+                    })
+
+                }
+                else
+                {
+                    res.send({
+                        "code":400,
+                        "failed":"This username is already taken"
+                    })
+                }
+                // When doesnt match data.length==0
+            });
         }
         else
         {
             res.send({
                 "code":400,
-                "failed":"This username is already taken"
+                "failed":"Enter correct Id Proof Number"
             })
         }
-        // When doesnt match data.length==0
-    });
+    }
+    else {
+        res.send({
+            "code":400,
+            "failed":"Enter correct Id Proof Number"
+        })
+    }
+
+}
+    if(req.body.proof==3)
+    {
+        if(req.body.nproof.length==9)
+        {
+            console.log("Yes it is 12");
+
+            udb.UsernameCheck(req.body.uname,function (data) {
+                // console.log("Data to be checked is")
+                // console.log(data);
+                if(data.length==0)
+                {
+                    udb.adduser(req.body.fname, req.body.lname,req.body.uname,req.body.password,req.body.mail,req.body.dob,req.body.address,req.body.Gender,req.body.proof,req.body.nproof,function (data) {
+                        res.render('pages/profile',{
+                            name:req.body.fname,
+                            last_name : req.body.lname,
+                            username:req.body.uname
+                        })
+                        console.log("Done")
+                    })
+                    res.send({
+
+                        "success":"Successful sign up"
+                    })
+
+                }
+                else
+                {
+                    res.send({
+                        "code":400,
+                        "failed":"This username is already taken"
+                    })
+                }
+                // When doesnt match data.length==0
+            });
+        }
+        else
+        {
+            res.send({
+                "code":400,
+                "failed":"Enter correct Id Proof Number"
+            })
+        }
+
+
+    }
+
 });
 
+function userdetails()
+{
+
+}
+app.post('/delete',function (req,res) {
+
+    console.log("I am in delete");
+})
 app.get("/",function(req,res){
     res.render('pages/index')
 });
@@ -284,25 +427,51 @@ app.post('/bookingForm',function (req,res) {
     });
 });
 
+function formatDate(date) {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+}
 app.post('/UserHistory',function(req,res){
+
     var username = req.body.username;
     var Bookings;
-    var query  = `select distinct(Bid),travel_to,travel_from from bookings where username = "${username}"`;
+    var query  = `select distinct(Bid),travel_to,travel_from,Start_Date from Bookings where username = "${username}"`;
     connection.query(query , function(err,data){
         Bookings = data;
         console.log("bookings is :::");
         console.log(Bookings);
+
+        console.log("HEre checking now");
+        console.log(((Bookings[2].Start_Date.toString())));
     })
 
-    var query = `select Bid,name,age,id_proof_number from bookings join Booking_member using (Bid) where bookings.username = "${username}" `;
+
+
+    var query = `select Bid,name,age,id_proof_number from Bookings join Booking_member using (Bid) where Bookings.username = "${username}" `;
     connection.query(query,function(err,data) {
         console.log("Data not available is");
         console.log(data);
 
+        var dataDate=[];
+        for(var i=0;i<Bookings.length;i++)
+        {
+            dataDate[i]=formatDate(Bookings[i].Start_Date);
+        }
+        console.log("data date is");
+        console.log(dataDate);
         res.render('pages/history',{
             username:username,
             data: data,
-            Bookings :Bookings
+            Bookings :Bookings,
+            dataDate:dataDate
+
         })
     })
     // var query = `select name,age,id_proof_number, from (user join Bookings using (username)) join Booking_member using (Bid) where user.Username = "${username}" `;
