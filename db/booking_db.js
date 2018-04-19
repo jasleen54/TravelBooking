@@ -22,7 +22,7 @@ var query=
         "travel_from varchar(200)," +
         "Start_Date Date," +
         "End_Date Date," +
-        "Payment varchar(20) REFERENCES Payments(Payment_ID)," +
+        "Status varchar(20)," +
         "Booking_date DATE," +
         "Hotel_ID varchar(30) REFERENCES Hotel(Hotel_ID))"
     connection.query(query,
@@ -58,7 +58,7 @@ function bookingmember() {
 function add(source, destination,startdate,returnDate,username, pnr,eid,callback) {
 
     console.log(startdate)
-    connection.query(`insert into Bookings (travel_from,travel_to,PNR,username, Start_date,End_date,Eid) values('${source}','${destination}',${pnr},'${username}','${startdate}','${returnDate}',${eid}) `, function(err,data) {
+    connection.query(`insert into Bookings (travel_from,travel_to,PNR,username, Start_date,End_date,Eid,Status) values('${source}','${destination}',${pnr},'${username}','${startdate}','${returnDate}',${eid},1) `, function(err,data) {
        if(err ==null ) {
             callback(data.insertId);
        }

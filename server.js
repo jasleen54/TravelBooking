@@ -14,6 +14,7 @@ var trigger = require("./db/triggers");
 var edb=require('./db/employee_db');
 var paydb=require('./db/payment_db');
 var placedb=require('./db/place_db');
+var canceldb=require('./db/cancellation');
 
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());
@@ -220,9 +221,10 @@ function addBooking(req,res) {
 app.post('/BookingDetailsInHistory',function(req,res){
    var Bid = req.query.Booking;
    console.log(Bid);
-   connection.query(`select * from bookings where Bid = ${Bid}`,function(err,data){
-        console.log(err);
-        console.log(data[0]);
+
+   connection.query(`select * from Bookings where Bid = ${Bid}`,function(err,data){
+
+
         var query  = `(select Flight_Number as Flight_Number,Airport_start as Airport_start,Airport_land as Airport_land,Start_date,Duration,null as Train_Number,null as RailwayStation_start,null as RailwayStation_reach,null as Bus_number,null as BusStop_start, null as BusStop_reach from Flight where Bid = ${Bid} ) 
                         UNION ALL 
                         (select null as Flight_Number,null as Airport_start, null as Airport_land ,Start_date,Duration,Train_Number as Train_Number,RailwayStation_start as RailwayStation_start,RailwayStation_reach as RailwayStation_reach,null as Bus_Number,null as BusStop_reach,null as BusStop_start from Train where Bid = ${Bid}) 
@@ -412,9 +414,17 @@ function userdetails()
 {
 
 }
-app.post('/delete',function (req,res) {
+app.post('/DeleteTheBooking',function (req,res) {
+    canceldb.delte(req.query.Bid,function (err,data) {
 
-    console.log("I am in delete");
+    })
+console.log(req.query.Bid);
+res.render('pages/booking',{
+
+})
+
+
+
 })
 app.get("/",function(req,res){
     res.render('pages/index')
@@ -442,14 +452,21 @@ app.post('/UserHistory',function(req,res){
 
     var username = req.body.username;
     var Bookings;
-    var query  = `select distinct(Bid),travel_to,travel_from,Start_Date from Bookings where username = "${username}"`;
+    var query  = `select distinct(Bid),travel_to,travel_from,Start_Date,Status from Bookings where username = "${username}"`;
     connection.query(query , function(err,data){
         Bookings = data;
-        console.log("bookings is :::");
-        console.log(Bookings);
+        console.log("******************************************");
+        for(var i=0;i<data.length;i++)
+        {
+            console.log(data[0].Status);
+        }
+        // console.log("bookings is :::");
+        // console.log(Bookings);
+        //
+        // console.log("HEre checking now");
+        // console.log(((Bookings[2].Start_Date.toString())));
+        console.log("I am checking data");
 
-        console.log("HEre checking now");
-        console.log(((Bookings[2].Start_Date.toString())));
     })
 
 
@@ -460,6 +477,7 @@ app.post('/UserHistory',function(req,res){
         console.log(data);
 
         var dataDate=[];
+        //For checking date output
         for(var i=0;i<Bookings.length;i++)
         {
             dataDate[i]=formatDate(Bookings[i].Start_Date);
